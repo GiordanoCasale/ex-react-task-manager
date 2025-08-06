@@ -18,3 +18,46 @@ nav a.active {
     color: blue;
     text-decoration: underline;
 }
+
+/*tasklist table*/
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+/*taskrow*/
+.color-to-do {
+    background-color: #f44336;
+    /* rosso */
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.color-doing {
+    background-color: #ffeb3b;
+    /* giallo */
+    color: black;
+    font-weight: bold;
+    text-align: center;
+}
+
+.color-done {
+    background-color: #4caf50;
+    /* verde */
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
