@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 
 export const GlobalContext = createContext();
 
@@ -23,8 +23,27 @@ const GlobalProvider = ({ children }) => {
 
         fetchTasks();
     }, []);
+
+    const addTask = useCallback((newTask) => {
+
+        setTasks((prev) => [...prev, newTask]);
+    }, []);
+
+    const removeTask = useCallback((taskId) => {
+        setTasks((prev) => prev.filter(task => task.id !== taskId));
+    }, []);
+
+
+    const updateTask = useCallback((updatedTask) => {
+
+        setTasks((prev) =>
+            prev.map(task => task.id === updatedTask.id ? updatedTask : task)
+        )
+    }, []);
+
+
     return (
-        <GlobalContext.Provider value={{ taskList, setTaskList }}>
+        <GlobalContext.Provider value={{ taskList, addTask, removeTask, updateTask, setTaskList }}>
             {children}
         </GlobalContext.Provider>
     );
