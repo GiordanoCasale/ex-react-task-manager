@@ -26,17 +26,17 @@ const GlobalProvider = ({ children }) => {
 
     const addTask = useCallback((newTask) => {
 
-        setTasks((prev) => [...prev, newTask]);
+        setTaskList((prev) => [...prev, newTask]);
     }, []);
 
     const removeTask = useCallback((taskId) => {
-        setTasks((prev) => prev.filter(task => task.id !== taskId));
+        setTaskList((prev) => prev.filter(task => task.id !== taskId));
     }, []);
 
 
     const updateTask = useCallback((updatedTask) => {
 
-        setTasks((prev) =>
+        setTaskList((prev) =>
             prev.map(task => task.id === updatedTask.id ? updatedTask : task)
         )
     }, []);
