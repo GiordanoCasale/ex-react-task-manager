@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 
+const baseUrl = import.meta.env.VITE_BACK_END_API
+
 const useTasks = () => {
     const [tasks, setTasks] = useState([]);
 
@@ -8,7 +10,7 @@ const useTasks = () => {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await axios.get('/tasks');
+                const response = await axios.get(`${baseUrl}/tasks`);
                 setTasks(response.data);
             } catch (error) {
                 console.error('Errore nel recupero dei task:', error);
@@ -19,9 +21,19 @@ const useTasks = () => {
     }, []);
 
 
-    const addTask = useCallback((newTask) => {
+    const addTask = useCallback(async (newTask) => {
+        try {
+            const response = await axios.post(`${baseUrl}/tasks`, newTask)
 
-        setTasks((prev) => [...prev, newTask]);
+            if (response.data.success) {
+                const createdTask = response.data.task;
+                setTasks((prev) => [...prev, createdTask]);
+            } else {
+                throw new Error(response.data.message)
+            }
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }, []);
 
     const removeTask = useCallback((taskId) => {

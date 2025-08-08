@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import useTasks from '../components/UseTasks';
 
 const AddTask = () => {
     const symbols = "!@#$%^&*()-_=+[]{}|;:'\\\",.<>?/`~";
@@ -8,6 +9,8 @@ const AddTask = () => {
 
     const descriptionRef = useRef(null);
     const statusRef = useRef(null);
+
+    const { addTask } = useTasks();
 
     const validateTitle = (value) => {
         const hasSymbols = [...value].some(char => symbols.includes(char));
@@ -29,27 +32,36 @@ const AddTask = () => {
         validateTitle(value);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const isTitleValid = validateTitle(title);
+
 
         if (!isTitleValid) {
             return;
         }
 
-        const task = {
+        const newTask = {
             title,
             description: descriptionRef.current.value,
             status: statusRef.current.value
         };
 
-        console.log('Task:', task);
+        try {
+            await addTask(newTask);
+            alert("Task creata con successo");
+
+            setTitle('');
+            descriptionRef.current.value = '';
+            statusRef.current.value = 'To do';
+        } catch (error) {
+            alert(`errore nella creazione del task: ${error.message}`)
+        }
+
+
 
         // Reset form (opzionale)
-        setTitle('');
-        descriptionRef.current.value = '';
-        statusRef.current.value = 'To do';
     };
 
     return (
