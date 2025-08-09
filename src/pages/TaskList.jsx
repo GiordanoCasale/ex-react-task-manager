@@ -2,6 +2,7 @@ import { useContext } from "react"
 import { GlobalContext } from "../contexts/GlobalContext"
 import TaskRow from "../components/TaskRow"
 
+
 const TaskList = () => {
     const { taskList } = useContext(GlobalContext)
     return (

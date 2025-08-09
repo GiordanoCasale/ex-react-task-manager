@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 
+
 const baseUrl = import.meta.env.VITE_BACK_END_API
 
 const useTasks = () => {
@@ -36,8 +37,17 @@ const useTasks = () => {
         }
     }, []);
 
-    const removeTask = useCallback((taskId) => {
-        setTasks((prev) => prev.filter(task => task.id !== taskId));
+    const removeTask = useCallback(async (taskId) => {
+        try {
+            const response = await axios.delete(`${baseUrl}/tasks/${taskId}`)
+            if (response.data.success) {
+                setTasks((prev) => prev.filter(task => task.id !== taskId));
+            } else {
+                throw new Error(response.data.message)
+            }
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }, []);
 
 

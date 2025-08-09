@@ -29,8 +29,27 @@ const GlobalProvider = ({ children }) => {
         setTaskList((prev) => [...prev, newTask]);
     }, []);
 
-    const removeTask = useCallback((taskId) => {
-        setTaskList((prev) => prev.filter(task => task.id !== taskId));
+    const removeTask = useCallback(async (taskId) => {
+        try {
+            const response = await fetch(`${BACK_END_API}/tasks/${taskId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Errore nella cancellazione');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                setTaskList((prev) => prev.filter(task => task.id !== parseInt(taskId)));
+            } else {
+                throw new Error(data.message || 'Errore generico');
+            }
+        } catch (error) {
+            console.error('Errore in removeTask:', error);
+            throw error;
+        }
     }, []);
 
 
