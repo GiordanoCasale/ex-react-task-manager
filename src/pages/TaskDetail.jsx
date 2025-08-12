@@ -2,34 +2,47 @@ import React, { useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../contexts/GlobalContext';
 import Modal from '../components/Modal';
+import EditTaskModal from '../components/EditTaskModal';
+import useTasks from '../components/UseTasks';
 
 const TaskDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { taskList, removeTask } = useContext(GlobalContext);
+    const { updateTask } = useTasks();
 
-    const [showModal, setShowModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+
     const task = taskList.find((t) => t.id.toString() === id);
 
-    const handleDeleteClick = () => {
-        setShowModal(true);
-    };
+    const handleDeleteClick = () => setShowDeleteModal(true);
+    const handleEditClick = () => setShowEditModal(true);
 
     const handleConfirmDelete = async () => {
         try {
             await removeTask(id);
             alert("Task eliminata con successo");
-            setShowModal(false);
+            setShowDeleteModal(false);
             navigate("/");
         } catch (error) {
             alert(`Errore: ${error.message}`);
-            setShowModal(false);
+            setShowDeleteModal(false);
         }
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-    }
+    const handleCloseDeleteModal = () => setShowDeleteModal(false);
+    const handleCloseEditModal = () => setShowEditModal(false);
+
+    const handleSaveTask = async (updatedTask) => {
+        try {
+            await updateTask(updatedTask);
+            alert("Task modificata con successo");
+            setShowEditModal(false);
+        } catch (error) {
+            alert(`Errore: ${error.message}`);
+        }
+    };
 
     if (!task) return <p>Task non trovato.</p>;
 
@@ -40,15 +53,25 @@ const TaskDetail = () => {
             <p><strong>Stato:</strong> {task.status}</p>
             <p><strong>Creato il:</strong> {new Date(task.createdAt).toLocaleDateString()}</p>
 
+            <button onClick={handleEditClick}>Modifica Task</button>
             <button onClick={handleDeleteClick}>Elimina Task</button>
+
 
             <Modal
                 title="Conferma eliminazione"
                 content="Sei sicuro di voler eliminare questo task?"
-                show={showModal}
-                onClose={handleCloseModal}
+                show={showDeleteModal}
+                onClose={handleCloseDeleteModal}
                 onConfirm={handleConfirmDelete}
                 confirmText="Elimina"
+            />
+
+
+            <EditTaskModal
+                show={showEditModal}
+                onClose={handleCloseEditModal}
+                task={task}
+                onSave={handleSaveTask}
             />
         </div>
     );

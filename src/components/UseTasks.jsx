@@ -51,11 +51,17 @@ const useTasks = () => {
     }, []);
 
 
-    const updateTask = useCallback((updatedTask) => {
-
-        setTasks((prev) =>
-            prev.map(task => task.id === updatedTask.id ? updatedTask : task)
-        )
+    const updateTask = useCallback(async (updatedTask) => {
+        try {
+            const response = await axios.put(`${baseUrl}/tasks/${updatedTask.id}`, updatedTask);
+            if (response.data.success) {
+                setTasks((prev) => prev.map(task => task.id === updatedTask.id ? response.data.task : task));
+            } else {
+                throw new Error(response.data.message);
+            }
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }, []);
 
 
