@@ -1,4 +1,4 @@
-import { useContext, useState, useMemo } from "react";
+import { useContext, useState, useMemo, useCallback, useRef } from "react";
 import { GlobalContext } from "../contexts/GlobalContext";
 import TaskRow from "../components/TaskRow";
 
@@ -11,23 +11,38 @@ const STATUS_ORDER = {
 const TaskList = () => {
     const { taskList } = useContext(GlobalContext);
 
-    // Stati per ordinamento
     const [sortBy, setSortBy] = useState("createdAt");
-    const [sortOrder, setSortOrder] = useState(1); // 1 = crescente, -1 = decrescente
+    const [sortOrder, setSortOrder] = useState(1);
 
-    // Funzione di click sulle intestazioni per gestire ordinamento
+    const [searchQuery, setSearchQuery] = useState("");
+    const debounceTimer = useRef(null);
+
+    const debounceSearch = useCallback((value) => {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+            setSearchQuery(value);
+        }, 300);
+    }, []);
+
+    const handleSearchChange = (e) => {
+        debounceSearch(e.target.value);
+    };
+
     const handleSortClick = (column) => {
         if (sortBy === column) {
-            setSortOrder(sortOrder * -1); // Inverti ordine
+            setSortOrder(sortOrder * -1);
         } else {
             setSortBy(column);
             setSortOrder(1);
         }
     };
 
-    // useMemo per array ordinato
-    const sortedTasks = useMemo(() => {
-        return [...taskList].sort((a, b) => {
+    const filteredSortedTasks = useMemo(() => {
+        const filtered = taskList.filter(task =>
+            task.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        return filtered.sort((a, b) => {
             let compareResult = 0;
 
             if (sortBy === "title") {
@@ -40,9 +55,8 @@ const TaskList = () => {
 
             return compareResult * sortOrder;
         });
-    }, [taskList, sortBy, sortOrder]);
+    }, [taskList, searchQuery, sortBy, sortOrder]);
 
-    // Funzione helper per mostrare una freccia di ordinamento nell'intestazione
     const renderSortArrow = (column) => {
         if (sortBy !== column) return null;
         return sortOrder === 1 ? " ▲" : " ▼";
@@ -51,43 +65,33 @@ const TaskList = () => {
     return (
         <div className="task-list-container">
             <h2>Lista dei task</h2>
-            {sortedTasks.length === 0 ? (
+
+            <input
+                type="search"
+                placeholder="Cerca task per nome..."
+                onChange={handleSearchChange}
+                className="task-search-input"
+            />
+
+            {filteredSortedTasks.length === 0 ? (
                 <p>Nessun task presente</p>
             ) : (
                 <table>
                     <thead>
                         <tr>
-                            <th
-                                onClick={() => handleSortClick("title")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Nome
-                                {sortBy === "title" && (
-                                    <span className="sort-arrow">{sortOrder === 1 ? " ▲" : " ▼"}</span>
-                                )}
+                            <th onClick={() => handleSortClick("title")} className="sortable-column">
+                                Nome{renderSortArrow("title")}
                             </th>
-                            <th
-                                onClick={() => handleSortClick("status")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Stato
-                                {sortBy === "status" && (
-                                    <span className="sort-arrow">{sortOrder === 1 ? " ▲" : " ▼"}</span>
-                                )}
+                            <th onClick={() => handleSortClick("status")} className="sortable-column">
+                                Stato{renderSortArrow("status")}
                             </th>
-                            <th
-                                onClick={() => handleSortClick("createdAt")}
-                                style={{ cursor: "pointer" }}
-                            >
-                                Data di creazione
-                                {sortBy === "createdAt" && (
-                                    <span className="sort-arrow">{sortOrder === 1 ? " ▲" : " ▼"}</span>
-                                )}
+                            <th onClick={() => handleSortClick("createdAt")} className="sortable-column">
+                                Data di creazione{renderSortArrow("createdAt")}
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {sortedTasks.map((task) => (
+                        {filteredSortedTasks.map((task) => (
                             <TaskRow key={task.id} task={task} />
                         ))}
                     </tbody>
@@ -95,7 +99,6 @@ const TaskList = () => {
             )}
         </div>
     );
-
 };
 
 export default TaskList;
